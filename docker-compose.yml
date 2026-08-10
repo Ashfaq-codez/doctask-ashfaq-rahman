@@ -1,0 +1,23 @@
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: superdocs_postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: superdocs_agent
+    ports:
+      - "5455:5432" # <-- Moving completely away from standard ports
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: superdocs_redis
+    ports:
+      - "6385:6379" # <-- Moving Redis to 6385 just to be safe too
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

@@ -1,0 +1,1 @@
+This is a test contract for the SuperDocs agentic pipeline.
