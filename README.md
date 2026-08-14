@@ -189,8 +189,5 @@ Open the URL provided in the console to execute tools:
 └── storage/
     └── uploads/                  # Shared Container Volume for File Ingestion
 
-```
 
-```
 
-```
