@@ -1,0 +1,37 @@
+# -----------------------------
+# Environments & Secrets
+# -----------------------------
+.env
+.env.*
+!.env.example
+
+# -----------------------------
+# Backend (Python / FastAPI)
+# -----------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+env/
+.venv/
+alembic/versions/*
+!alembic/versions/.keep
+backend/storage/uploads/*
+!backend/storage/uploads/.keep
+
+# -----------------------------
+# Frontend (Node / React)
+# -----------------------------
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+npm-debug.log
+yarn-error.log
+
+# -----------------------------
+# OS & Editor Files
+# -----------------------------
+.DS_Store
+.vscode/
+.idea/
+*.swp

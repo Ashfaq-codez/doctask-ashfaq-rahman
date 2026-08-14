@@ -6,6 +6,13 @@ from fastapi.middleware.cors import CORSMiddleware
 # Import all of our active routers exactly once
 from app.api import upload, runs, conflicts, facts
 
+# NEW: Import the DB engine and all models so SQLAlchemy knows they exist
+from app.db import engine
+from app.models.base import Base
+from app.models.document import Document
+from app.models.fact import Fact
+from app.models.conflict import Conflict
+
 # Setup Logging
 logging.basicConfig(
     level=logging.INFO,
@@ -17,6 +24,12 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Starting SuperDocs Agentic Backend...")
+    
+    # NEW: Automatically create all database tables if they don't exist
+    logger.info("Initializing database tables...")
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+        
     yield
     logger.info("Shutting down SuperDocs Agentic Backend cleanly...")
 

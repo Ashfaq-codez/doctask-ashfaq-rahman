@@ -1,0 +1,21 @@
+{
+  "id": "chatcmpl-test-conflict-001",
+  "object": "chat.completion",
+  "created": 1723680000,
+  "model": "gpt-4o-mini",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "{\"anomalies\": [], \"contradictions\": [{\"topic\": \"Jurisdiction Conflict\", \"existing_fact_id\": \"fact-existing-uuid-99\", \"new_fact_text\": \"The governing law of the contract is the State of Delaware.\", \"reasoning\": \"Existing verified memory asserts California jurisdiction, whereas the new document mandates Delaware.\"}]}"
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 150,
+    "completion_tokens": 58,
+    "total_tokens": 208
+  }
+}

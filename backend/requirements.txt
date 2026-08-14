@@ -1,26 +1,19 @@
-# FastAPI core
-fastapi>=0.110.1
-uvicorn[standard]>=0.29.0
-pydantic>=2.6.4
-pydantic-settings>=2.2.1
-
-# Database & Vectors
- 
-sqlalchemy>=2.0.29
-asyncpg>=0.29.0
-pgvector>=0.2.5
-alembic>=1.13.1
-
-# AI & Orchestration
-langgraph>=0.0.31
-langchain-core>=0.1.40
-langchain-openai>=0.1.1  # Pluggable for other LLMs
-
-# Task Queues & Workers
-celery>=5.3.6
-redis>=5.0.3
-
-# Utilities
-python-multipart>=0.0.9
-python-jose[cryptography]>=3.3.0
-httpx>=0.27.0
+fastapi
+uvicorn
+sqlalchemy[asyncio]
+asyncpg
+psycopg[binary]
+alembic
+celery
+redis
+python-dotenv
+langchain-openai
+langchain-core
+langgraph
+langgraph-checkpoint-postgres
+pydantic
+fastmcp
+pypdf
+python-docx
+pytest
+pytest-asyncio
