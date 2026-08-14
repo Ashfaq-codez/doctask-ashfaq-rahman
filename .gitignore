@@ -1,3 +1,8 @@
+# 1. Inside your project root, initialize Git
+git init
+
+# 2. Verify or create your .gitignore
+cat << 'EOF' > .gitignore
 # -----------------------------
 # Environments & Secrets
 # -----------------------------
@@ -14,6 +19,7 @@ __pycache__/
 venv/
 env/
 .venv/
+.pytest_cache/
 alembic/versions/*
 !alembic/versions/.keep
 backend/storage/uploads/*
@@ -35,3 +41,4 @@ yarn-error.log
 .vscode/
 .idea/
 *.swp
+EOF
