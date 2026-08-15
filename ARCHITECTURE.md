@@ -3,6 +3,7 @@
 ## 1. High-Level System Architecture
 
 
+```
                    ┌────────────────────────┐
                    │  React Dashboard (Vite) │
                    │    (Neo-Brutalist UI)  │
