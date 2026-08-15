@@ -1,6 +1,3 @@
-### 1. Updated `README.md`
-
-```markdown
 # SuperDocs: Human-Gated Distributed AI Agentic System
 
 SuperDocs is an event-driven, distributed document auditing and intelligence platform. It ingests multi-format documents, extracts verifiable atomic facts with source quotes, tracks state checkpoints in PostgreSQL, audits contradictions against historical corpus memory, and routes conflicting findings through an interactive Human-in-the-Loop (HITL) review gate.
@@ -9,7 +6,7 @@ SuperDocs is an event-driven, distributed document auditing and intelligence pla
 
 ## 🏛 Architecture Overview
 
-```text
+```
 ┌─────────────────────────────────────────────────────────────┐
 │                      FastAPI Gateway                        │
 │             (POST /api/v1/upload/ · GET /facts)             │
