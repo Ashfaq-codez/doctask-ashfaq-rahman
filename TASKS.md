@@ -1,6 +1,3 @@
-### 2. Updated `TASKS.md`
-
-```markdown
 # SuperDocs Task Tracker & Roadmap
 
 ## Phase 1: Infrastructure & Data Modeling (✅ COMPLETED)
@@ -37,4 +34,3 @@
 - [x] Provide out-of-the-box contract evaluation samples in `/samples`[cite: 9].
 - [x] Complete updated root `README.md`, `ARCHITECTURE.md`, and `PROGRESS.md`[cite: 8, 9].
 
-```
