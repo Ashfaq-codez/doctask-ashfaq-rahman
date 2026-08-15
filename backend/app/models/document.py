@@ -1,16 +1,16 @@
-from sqlalchemy import Column, String, ForeignKey, DateTime, Enum
-from sqlalchemy.sql import func
 import enum
 import uuid
+from sqlalchemy import Column, String, ForeignKey, DateTime, Enum
+from sqlalchemy.sql import func
 from .base import Base
 
 class DocumentStatus(str, enum.Enum):
-    UPLOADED = "uploaded"
-    CLASSIFIED = "classified"
-    EMBEDDED = "embedded"
-    PROCESSED = "processed"
-    FAILED = "failed"
-    IGNORED_DUPLICATE = "ignored_duplicate" # Handles the incremental update requirement
+    UPLOADED = "UPLOADED"
+    CLASSIFIED = "CLASSIFIED"
+    EMBEDDED = "EMBEDDED"
+    PROCESSED = "PROCESSED"
+    FAILED = "FAILED"
+    IGNORED_DUPLICATE = "IGNORED_DUPLICATE"
 
 class Document(Base):
     """
@@ -23,9 +23,9 @@ class Document(Base):
     run_id = Column(String, ForeignKey("runs.id", ondelete="CASCADE"), index=True)
     
     file_name = Column(String, nullable=False)
-    file_type = Column(String) # e.g., 'application/pdf', 'text/plain'
+    file_type = Column(String, nullable=True)  # e.g., 'application/pdf', 'text/plain'
     
-    # The hash is critical. If we see this hash again in the same corpus, we skip it.
+    # SHA-256 hash to detect duplicate files across runs
     file_hash = Column(String, index=True, nullable=False) 
     
     status = Column(Enum(DocumentStatus), default=DocumentStatus.UPLOADED, index=True)

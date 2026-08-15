@@ -1,40 +1,40 @@
-Mark the final deliverables in your task tracker:
+### 2. Updated `TASKS.md`
 
 ```markdown
-# SuperDocs Task Tracker
+# SuperDocs Task Tracker & Roadmap
 
 ## Phase 1: Infrastructure & Data Modeling (✅ COMPLETED)
-- [x] Scaffold FastAPI backend and React frontend.
-- [x] Configure PostgreSQL and Async SQLAlchemy.
-- [x] Define data models (`Run`, `Document`, `Fact`, `Conflict`).
-- [x] Generate and apply Alembic migrations.
+- [x] Scaffold FastAPI backend and React frontend[cite: 9].
+- [x] Configure PostgreSQL 16 engine and Async SQLAlchemy session factory[cite: 8, 9].
+- [x] Define declarative ORM schemas (`Run`, `Document`, `Fact`, `Conflict`, `EventLog`, `ReviewItem`)[cite: 9].
+- [x] Generate and apply initial Alembic database migrations (`f5141b7fc326`)[cite: 9].
 
-## Phase 2: Core Processing Loop (✅ COMPLETED)
-- [x] Build FastAPI ingestion endpoint (`POST /api/v1/upload/`).
-- [x] Set up Redis broker and Celery worker.
-- [x] Build LangGraph Agent (Extractor Node).
-- [x] Enforce structured JSON output via Pydantic.
-- [x] Bridge Celery (sync) to Database (async) to persist extracted facts.
+## Phase 2: Core Agentic Processing & Persistence (✅ COMPLETED)
+- [x] Build file ingestion endpoint (`POST /api/v1/upload/`) with SHA-256 hash deduplication[cite: 9].
+- [x] Configure Redis message broker and Celery asynchronous background worker[cite: 9].
+- [x] Implement LangGraph state machine with structured Pydantic output schemas (`FactExtraction`, `ConflictExtraction`)[cite: 9].
+- [x] Bridge Celery synchronous task runners with async database sessions[cite: 9].
+- [x] Add fact deduplication layer during database persistence[cite: 9].
 
-## Phase 3: Agentic Reasoning & Human-in-the-Loop (✅ COMPLETED)
-- [x] Add Auditor Node to LangGraph for single-document anomaly detection.
-- [x] Build APIs to fetch and resolve pending conflicts.
-- [x] Build React Dashboard with editorial styling.
-- [x] Inject database memory into LangGraph for Cross-Document Contradiction detection.
-- [x] Map newly generated UUIDs to link Historic Facts with New Facts in Conflict records.
-- [x] Implement "Live Sync" background polling in the React UI.
+## Phase 3: Reasoning, Review Gate & Human-in-the-Loop (✅ COMPLETED)
+- [x] Implement `detect_conflicts_node` to cross-reference extracted facts against historical memory[cite: 9].
+- [x] Build `/api/v1/conflicts/pending` and `/resolve` endpoints for human gate decisions[cite: 9].
+- [x] Build React Dashboard with real-time polling ("Live Sync") and conflict review cards[cite: 9].
+- [x] Implement truth mutation logic (`is_active = False` on superseded records) upon review override[cite: 9].
+- [x] Align PostgreSQL status enums (`DocumentStatus`, `RunStatus`, `ConflictStatus`) across API and worker layers.
 
-## Phase 4: Visual Provenance & Resiliency (✅ COMPLETED)
-- [x] Add `page_number` and `exact_quote` extraction to the AI prompt.
-- [x] Build multi-format document parser (PDF, DOCX, TXT).
-- [x] Implement Document Viewer component with inline highlighting.
-- [x] Containerize the entire application using Docker Compose for 1-click deployment.
-- [x] Add LangGraph Postgres Checkpointer for crash-proof resumability.
-- [x] Expose backend as an MCP Server using FastMCP.
+## Phase 4: Production Hardening & Machine Surface (✅ COMPLETED)
+- [x] Add `exact_quote` and `page_number` provenance tracking to fact extraction schemas[cite: 9].
+- [x] Implement prompt injection defense node (`guardrail_sanitizer_node`) to treat adversarial instructions as data[cite: 8].
+- [x] Integrate LangGraph PostgreSQL checkpointing (`AsyncPostgresSaver`) for crash recovery and resumability[cite: 9].
+- [x] Add stage-by-stage token and USD cost calculation saved to the `Run` model[cite: 8].
+- [x] Implement FastMCP stdio interface (`backend/app/mcp_server.py`) exposing 4 tools for autonomous machine execution[cite: 8, 9].
+- [x] Containerize the entire 5-service stack via `docker-compose.yml`[cite: 9].
 
-## Phase 5: Testing, Memory Mutation & Delivery (✅ COMPLETED)
-- [x] Build deterministic wire-level VCR test fixtures.
-- [x] Write Pytest suite covering graph traversal, crash resumption, and concurrency isolation.
-- [x] Mutate verified fact state (`is_active = False`) upon conflict resolution.
-- [x] Create sample contracts in `/samples` for evaluator validation.
-- [x] Complete comprehensive root `README.md` documentation.
+## Phase 5: Automated Testing & Verification (✅ COMPLETED)
+- [x] Create deterministic wire-level VCR test fixtures for zero-key evaluation[cite: 9].
+- [x] Build 7/7 test suite (`test_agent.py`, `test_agent_behaviors.py`) covering crash recovery, concurrency isolation, and adversarial prompt handling[cite: 9].
+- [x] Provide out-of-the-box contract evaluation samples in `/samples`[cite: 9].
+- [x] Complete updated root `README.md`, `ARCHITECTURE.md`, and `PROGRESS.md`[cite: 8, 9].
+
+```

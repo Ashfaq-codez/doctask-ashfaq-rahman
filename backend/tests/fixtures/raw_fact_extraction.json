@@ -8,14 +8,14 @@
       "index": 0,
       "message": {
         "role": "assistant",
-        "content": "{\"facts\": [{\"fact_value\": \"The governing law of the contract is the State of Delaware.\", \"exact_quote\": \"Jurisdiction: State of Delaware\", \"page_number\": 1}, {\"fact_value\": \"The payment terms are Net 30 days.\", \"exact_quote\": \"Payment Terms: Net 30 days upon invoice receipt.\", \"page_number\": 1}]}"
+        "content": "{\"facts\": [{\"fact_value\": \"Taj Mahal is white in color.\", \"exact_quote\": \"taj mahal is white in color\", \"page_number\": 1}]}"
       },
       "finish_reason": "stop"
     }
   ],
   "usage": {
     "prompt_tokens": 120,
-    "completion_tokens": 65,
-    "total_tokens": 185
+    "completion_tokens": 35,
+    "total_tokens": 155
   }
 }

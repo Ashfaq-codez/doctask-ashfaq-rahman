@@ -8,14 +8,14 @@
       "index": 0,
       "message": {
         "role": "assistant",
-        "content": "{\"anomalies\": [], \"contradictions\": [{\"topic\": \"Jurisdiction Conflict\", \"existing_fact_id\": \"fact-existing-uuid-99\", \"new_fact_text\": \"The governing law of the contract is the State of Delaware.\", \"reasoning\": \"Existing verified memory asserts California jurisdiction, whereas the new document mandates Delaware.\"}]}"
+        "content": "{\"anomalies\": [], \"contradictions\": [{\"topic\": \"Taj Mahal Color Contradiction\", \"existing_fact_id\": null, \"new_fact_text\": \"Taj Mahal is black in color.\", \"reasoning\": \"Existing verified memory asserts the Taj Mahal is white in color, whereas the new document mandates it is black in color.\"}]}"
       },
       "finish_reason": "stop"
     }
   ],
   "usage": {
-    "prompt_tokens": 150,
-    "completion_tokens": 58,
-    "total_tokens": 208
+    "prompt_tokens": 140,
+    "completion_tokens": 60,
+    "total_tokens": 200
   }
 }

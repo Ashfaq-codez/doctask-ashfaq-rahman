@@ -1,4 +1,5 @@
 import os
+from typing import Any, Dict, List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -8,98 +9,105 @@ from app.models.conflict import Conflict, ConflictStatus
 from app.models.fact import Fact
 from app.models.document import Document
 
-router = APIRouter()
+router = APIRouter(tags=["conflicts"])
+
 
 @router.get("/pending")
-async def get_pending_conflicts(db: AsyncSession = Depends(get_db)):
-    """Fetches conflicts, their exact quotes, and the target document ID."""
+async def get_pending_conflicts(db: AsyncSession = Depends(get_db)) -> List[Dict[str, Any]]:
+    """Fetches pending conflicts, their exact quotes, and the target document ID."""
     FactA = aliased(Fact)
     FactB = aliased(Fact)
-    
-    query = await db.execute(
-        select(Conflict, FactA.paragraph_text, FactB.paragraph_text, FactB.document_id) # type: ignore
-        .outerjoin(FactA, Conflict.fact_a_id == FactA.id)
-        .outerjoin(FactB, Conflict.fact_b_id == FactB.id)
-        .where(Conflict.status == ConflictStatus.PENDING_REVIEW.value)  # type: ignore
+
+    query = (
+        select(Conflict, FactA.paragraph_text, FactB.paragraph_text, FactB.document_id)
+        .outerjoin(FactA, Conflict.fact_a_id == FactA.id)  # type: ignore[arg-type]
+        .outerjoin(FactB, Conflict.fact_b_id == FactB.id)  # type: ignore[arg-type]
+        .where(Conflict.status == ConflictStatus.PENDING_REVIEW)
+        .order_by(Conflict.created_at.desc())  # type: ignore[attr-defined]
     )
-    
-    results = query.all()
-    
-    return [
-        {
-            "id": row[0].id,
-            "run_id": row[0].run_id,
-            "topic": row[0].topic,
-            "ai_reasoning": row[0].ai_reasoning,
-            "status": row[0].status,
-            "fact_a_text": row[1] or "Historic context not found.",
-            "fact_b_text": row[2] or "New context not found.",
-            "document_id": row[3] 
-        } for row in results
-    ]
+
+    result = await db.execute(query)
+    results = result.all()
+
+    output = []
+    for row in results:
+        conflict_obj: Conflict = row[0]
+        fact_a_text: str = row[1] or "Historic context not found."
+        fact_b_text: str = row[2] or getattr(conflict_obj, "new_fact_text", None) or "New context not found."
+        doc_id: str = str(row[3] or getattr(conflict_obj, "document_id", "") or "")
+
+        output.append({
+            "id": str(conflict_obj.id),
+            "run_id": str(conflict_obj.run_id) if getattr(conflict_obj, "run_id", None) is not None else None,
+            "topic": getattr(conflict_obj, "topic", "General"),
+            "ai_reasoning": getattr(conflict_obj, "ai_reasoning", None) or getattr(conflict_obj, "reasoning", ""),
+            "status": str(conflict_obj.status.value if hasattr(conflict_obj.status, "value") else conflict_obj.status),
+            "fact_a_text": fact_a_text,
+            "fact_b_text": fact_b_text,
+            "document_id": doc_id
+        })
+
+    return output
+
 
 @router.post("/{conflict_id}/resolve")
-async def resolve_conflict(conflict_id: str, payload: dict, db: AsyncSession = Depends(get_db)):
-    """Resolves the conflict."""
+async def resolve_conflict(conflict_id: str, payload: Dict[str, Any], db: AsyncSession = Depends(get_db)) -> Dict[str, str]:
+    """Resolves the conflict and updates truth state."""
     conflict = await db.get(Conflict, conflict_id)
-    if conflict:
-        conflict.status = payload.get("status") # type: ignore
-        await db.commit()
+    if not conflict:
+        raise HTTPException(status_code=404, detail="Conflict not found")
+
+    status_val = payload.get("status", "RESOLVED")
+    
+    # Try mapping to enum member if matching
+    try:
+        status_enum = ConflictStatus(status_val)
+        setattr(conflict, "status", status_enum)
+    except Exception:
+        setattr(conflict, "status", status_val)
+
+    # State mutation: If superseded, deactivate historic fact
+    fact_a_id = getattr(conflict, "fact_a_id", None)
+    if status_val in ["RESOLVED_KEPT_B", "resolved_kept_b"] and fact_a_id is not None:
+        fact_a = await db.get(Fact, str(fact_a_id))
+        if fact_a:
+            setattr(fact_a, "is_active", False)
+
+    await db.commit()
     return {"status": "success"}
 
+
 @router.get("/document-text/{document_id}")
-async def get_document_text(document_id: str, db: AsyncSession = Depends(get_db)):
-    """Reads the raw text from the server, hunting across possible path structures."""
+async def get_document_text(document_id: str, db: AsyncSession = Depends(get_db)) -> Dict[str, str]:
+    """Reads the raw text for a document from storage."""
     doc = await db.get(Document, document_id)
-    
+
     if not doc:
         raise HTTPException(status_code=404, detail="Document not found in database.")
-    
+
     file_path = getattr(doc, "storage_path", None)
     file_name = getattr(doc, "file_name", "")
-    
-    # We create a list of everywhere the file could possibly be based on where you run Uvicorn
+
     possible_paths = [
         file_path,
-        os.path.join("storage", "uploads", file_name),
-        os.path.join("backend", "storage", "uploads", file_name),
-        os.path.join("..", "storage", "uploads", file_name)
+        os.path.join("storage", "uploads", file_name) if file_name else None,
+        os.path.join("backend", "storage", "uploads", file_name) if file_name else None,
+        os.path.join("..", "storage", "uploads", file_name) if file_name else None,
+        os.path.join("/app/storage/uploads", file_name) if file_name else None,
     ]
-    
+
     valid_path = None
     for path in possible_paths:
         if path and isinstance(path, str) and os.path.exists(path):
             valid_path = path
             break
-            
+
     if not valid_path:
-        # If it still fails, print the paths it tried to the terminal so we can debug it instantly
-        print(f"❌ [API] Could not find {file_name}. Looked in: {possible_paths}")
         raise HTTPException(status_code=404, detail="Document file not found on the server disk.")
-    
+
     try:
-        with open(valid_path, "r", encoding="utf-8") as f:
-            return {"text": f.read()}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to read file: {str(e)}")
-    """Reads the raw text using the correct storage_path column."""
-    doc = await db.get(Document, document_id)
-    
-    if not doc:
-        raise HTTPException(status_code=404, detail="Document not found in database.")
-    
-    # CRITICAL FIX: Using the actual column name from your schema
-    file_path = getattr(doc, "storage_path", None)
-    
-    if not file_path:
-        file_name = getattr(doc, "file_name", "")
-        file_path = os.path.join("storage", "uploads", file_name)
-        
-    if not file_path or not os.path.exists(file_path):
-        raise HTTPException(status_code=404, detail="Document file not found on the server disk.")
-    
-    try:
-        with open(file_path, "r", encoding="utf-8") as f:
-            return {"text": f.read()}
+        with open(valid_path, "r", encoding="utf-8", errors="ignore") as f:
+            content = f.read()
+        return {"text": content}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to read file: {str(e)}")

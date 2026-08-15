@@ -1,28 +1,39 @@
 import os
 from typing import AsyncGenerator
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
-from dotenv import load_dotenv
+from sqlalchemy.orm import declarative_base
 
-# Load environment variables
-load_dotenv(os.path.join(os.path.dirname(__file__), '..', '..', '.env'))
+DATABASE_URL = os.getenv(
+    "DATABASE_URL", 
+    "postgresql+asyncpg://user:password@postgres:5432/superdocs_db"
+)
 
-DATABASE_URL = os.environ.get("DATABASE_URL")
+# Configure engine with connection pooling and pre-ping
+engine = create_async_engine(
+    DATABASE_URL,
+    echo=False,
+    pool_size=10,
+    max_overflow=20,
+    pool_pre_ping=True,
+    pool_recycle=300
+)
 
-# FIX 1: Explicitly check for None to satisfy Pylance and prevent runtime crashes
-if not DATABASE_URL:
-    raise ValueError("DATABASE_URL environment variable is missing.")
+# Export both names to satisfy all imports across worker and API modules
+async_session_factory = async_sessionmaker(
+    bind=engine,
+    class_=AsyncSession,
+    expire_on_commit=False,
+    autoflush=False
+)
 
-# Create the async engine
-engine = create_async_engine(DATABASE_URL, echo=False)
+AsyncSessionLocal = async_session_factory
 
-# Create a session factory
-AsyncSessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+Base = declarative_base()
 
-# FIX 2: Correct the type hint to AsyncGenerator
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
-    """
-    Dependency function to yield database sessions for FastAPI routes.
-    Ensures sessions are closed cleanly after each request.
-    """
-    async with AsyncSessionLocal() as session:
-        yield session
+    """Dependency that yields a database session and guarantees cleanup."""
+    async with async_session_factory() as session:
+        try:
+            yield session
+        finally:
+            await session.close()
