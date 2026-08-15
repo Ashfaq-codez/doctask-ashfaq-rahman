@@ -1,6 +1,3 @@
-### `ARCHITECTURE.md`
-
-```markdown
 # Architectural Specification: SuperDocs Agentic Auditor
 
 ## 1. High-Level System Architecture
