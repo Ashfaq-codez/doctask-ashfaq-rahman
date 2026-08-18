@@ -14,6 +14,7 @@ from app.models.run import Run, RunStatus
 from app.models.document import Document, DocumentStatus
 from app.models.conflict import Conflict, ConflictStatus
 from app.agent.graph import build_agent_graph, AgentState
+from app.services.parser import extract_document_text
 
 load_dotenv(os.path.join(os.path.dirname(__file__), "..", "..", ".env"))
 
@@ -199,9 +200,21 @@ async def execute_agent_workflow(run_id: str, document_id: str, file_path: str):
         ]
         for p in possible_paths:
             if p and os.path.exists(p):
+                document_text = extract_document_text(p)
+                break
                 try:
-                    with open(p, "r", encoding="utf-8", errors="ignore") as f:
-                        document_text = f.read()
+                    if p.lower().endswith(".pdf"):
+                        # Extract clean text from PDF pages
+                        try:
+                            import pypdf
+                            reader = pypdf.PdfReader(p)
+                            document_text = "\n".join([page.extract_text() or "" for page in reader.pages])
+                        except Exception:
+                            with open(p, "r", encoding="utf-8", errors="ignore") as f:
+                                document_text = f.read()
+                    else:
+                        with open(p, "r", encoding="utf-8", errors="ignore") as f:
+                            document_text = f.read()
                     break
                 except Exception as read_err:
                     print(f"⚠️ [WORKER] Could not read file at {p}: {read_err}")
