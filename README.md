@@ -93,6 +93,13 @@ cp .env.example .env
 ```bash
 docker compose up --build
 
+if docker is already running on system
+sudo systemctl restart docker
+docker compose up --build -d
+
+then run 
+docker compose up --build
+
 ```
 
 ### Service Endpoints:
