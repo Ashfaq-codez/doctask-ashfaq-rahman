@@ -91,7 +91,7 @@ cp .env.example .env
 ### 3. Launch Services:
 
 ```bash
-docker compose up --build -d
+docker compose up --build
 
 ```
 
